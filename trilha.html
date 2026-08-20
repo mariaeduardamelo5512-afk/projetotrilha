@@ -1,0 +1,1649 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>TrilhaGlobal | Viaje mais. Descubra o mundo.</title>
+
+    <!-- Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
+    <style>
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, Helvetica, sans-serif;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            background: #eef5fb;
+            color: #101a32;
+        }
+
+        a {
+            text-decoration: none;
+        }
+
+        /* =========================
+           HEADER
+        ========================= */
+
+        header {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            padding: 18px 45px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            z-index: 10;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 9px;
+        }
+
+        .logo-icon {
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            background: #0874ed;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 21px;
+        }
+
+        .logo-text strong {
+            display: block;
+            color: #0754b8;
+            font-size: 25px;
+            line-height: 23px;
+        }
+
+        .logo-text small {
+            color: #15294c;
+            font-size: 10px;
+        }
+
+        nav {
+            display: flex;
+            gap: 28px;
+            margin-left: auto;
+            margin-right: 30px;
+        }
+
+        nav a {
+            color: #07172f;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        nav a:hover {
+            color: #0874ed;
+        }
+
+        .header-buttons {
+            display: flex;
+            gap: 9px;
+        }
+
+        .header-buttons a {
+            padding: 9px 18px;
+            border-radius: 8px;
+            font-size: 11px;
+            font-weight: bold;
+        }
+
+        .login-btn {
+            background: white;
+            color: #0874ed;
+            border: 1px solid #d8e4f2;
+        }
+
+        .register-btn {
+            background: #0874ed;
+            color: white;
+        }
+
+        /* =========================
+           HERO
+        ========================= */
+
+        .hero {
+            min-height: 350px;
+
+            background:
+                linear-gradient(
+                    90deg,
+                    rgba(236,247,255,.98) 0%,
+                    rgba(232,246,255,.90) 34%,
+                    rgba(232,246,255,.15) 72%
+                ),
+                url("imagens/banner.jpg");
+
+            background-size: cover;
+            background-position: center;
+
+            position: relative;
+        }
+
+        .hero-content {
+            padding: 104px 45px 55px;
+            width: 53%;
+        }
+
+        .hero h1 {
+            font-size: 34px;
+            line-height: 1.04;
+            color: #071633;
+            margin-bottom: 14px;
+        }
+
+        .hero h1 span {
+            color: #0874ed;
+        }
+
+        .hero p {
+            max-width: 340px;
+            font-size: 11px;
+            line-height: 1.6;
+            margin-bottom: 16px;
+            color: #18243b;
+        }
+
+        .hero-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn {
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
+            padding: 10px 22px;
+            border-radius: 7px;
+            font-size: 11px;
+            font-weight: bold;
+        }
+
+        .btn-blue {
+            background: #0874ed;
+            color: white;
+            box-shadow: 0 5px 12px rgba(8,116,237,.25);
+        }
+
+        .btn-white {
+            background: white;
+            color: #0874ed;
+            border: 1px solid #dbe6f3;
+        }
+
+        /* =========================
+           PESQUISA
+        ========================= */
+
+        .search-box {
+            width: calc(100% - 200px);
+            min-height: 55px;
+            margin: -27px auto 0;
+            position: relative;
+            z-index: 5;
+            background: white;
+            border-radius: 14px;
+            box-shadow: 0 8px 25px rgba(24,68,110,.15);
+            display: flex;
+            align-items: center;
+            padding: 7px 10px;
+        }
+
+        .search-item {
+            flex: 1;
+            padding: 5px 18px;
+            border-right: 1px solid #e2e9f2;
+        }
+
+        .search-item strong {
+            display: block;
+            font-size: 9px;
+            margin-bottom: 4px;
+        }
+
+        .search-item input {
+            border: none;
+            outline: none;
+            width: 100%;
+            color: #737d8e;
+            font-size: 9px;
+        }
+
+        .search-button {
+            border: none;
+            width: 105px;
+            height: 35px;
+            border-radius: 8px;
+            background: #0874ed;
+            color: white;
+            font-size: 10px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        /* =========================
+           CONTEÚDO
+        ========================= */
+
+        main {
+            background: white;
+        }
+
+        .section {
+            padding: 30px 45px 10px;
+        }
+
+        .section-header {
+            display: flex;
+            align-items: end;
+            justify-content: space-between;
+            margin-bottom: 18px;
+        }
+
+        .section-header h2 {
+            font-size: 16px;
+            color: #111b30;
+        }
+
+        .section-header h2::after {
+            content: "";
+            display: block;
+            width: 25px;
+            height: 2px;
+            background: #0874ed;
+            margin-top: 8px;
+        }
+
+        .section-header a {
+            color: #0874ed;
+            font-size: 9px;
+            font-weight: bold;
+        }
+
+        /* =========================
+           DESTINOS
+        ========================= */
+
+        .destinos {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 11px;
+        }
+
+        .destino-card {
+            height: 155px;
+            border-radius: 9px;
+            overflow: hidden;
+            position: relative;
+            background-size: cover;
+            background-position: center;
+            transition: .3s;
+        }
+
+        .destino-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .destino-card::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(
+                transparent 35%,
+                rgba(0,0,0,.75)
+            );
+        }
+
+        .destino-info {
+            position: absolute;
+            bottom: 10px;
+            left: 10px;
+            right: 10px;
+            z-index: 2;
+            color: white;
+        }
+
+        .destino-info h3 {
+            font-size: 14px;
+            margin-bottom: 4px;
+        }
+
+        .destino-info p {
+            font-size: 9px;
+        }
+
+        .rating {
+            float: right;
+            color: #ffd500;
+            font-size: 9px;
+        }
+
+        /* =========================
+           BENEFÍCIOS
+        ========================= */
+
+        .beneficios {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            padding-bottom: 30px;
+        }
+
+        .beneficio {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .beneficio-icon {
+            width: 45px;
+            height: 45px;
+            min-width: 45px;
+            border-radius: 50%;
+            background: #f0f7ff;
+            border: 1px solid #e0ecfb;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #0874ed;
+            font-size: 20px;
+        }
+
+        .beneficio h3 {
+            font-size: 10px;
+            margin-bottom: 5px;
+        }
+
+        .beneficio p {
+            font-size: 8px;
+            line-height: 1.5;
+            color: #606b7d;
+        }
+
+        /* =========================
+           PACOTES
+        ========================= */
+
+        .pacotes-area {
+            padding: 28px 45px;
+            background: #f7fbff;
+        }
+
+        .pacotes {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+        }
+
+        .pacote {
+            background: white;
+            border-radius: 9px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(32,70,110,.09);
+            border: 1px solid #edf2f8;
+            transition: .3s;
+        }
+
+        .pacote:hover {
+            transform: translateY(-5px);
+        }
+
+        .pacote img {
+            width: 100%;
+            height: 105px;
+            object-fit: cover;
+        }
+
+        .pacote-content {
+            padding: 10px;
+        }
+
+        .pacote-content h3 {
+            font-size: 11px;
+            margin-bottom: 5px;
+        }
+
+        .pacote-content p {
+            color: #6a7382;
+            font-size: 8px;
+            margin-bottom: 12px;
+        }
+
+        .pacote-bottom {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .preco small {
+            display: block;
+            font-size: 7px;
+            color: #6a7382;
+        }
+
+        .preco strong {
+            font-size: 12px;
+        }
+
+        .detalhes {
+            background: #0874ed;
+            color: white;
+            border-radius: 5px;
+            padding: 7px 10px;
+            font-size: 8px;
+            font-weight: bold;
+        }
+
+        /* =========================
+           AVALIAÇÕES
+        ========================= */
+
+        .avaliacoes {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+        }
+
+        .avaliacao {
+            background: white;
+            border: 1px solid #e6edf6;
+            border-radius: 9px;
+            padding: 13px;
+            box-shadow: 0 4px 15px rgba(35,70,110,.06);
+        }
+
+        .cliente {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 9px;
+        }
+
+        .cliente-foto {
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
+        .cliente strong {
+            display: block;
+            font-size: 9px;
+        }
+
+        .cliente span {
+            color: #697487;
+            font-size: 7px;
+        }
+
+        .estrelas {
+            color: #ffb400;
+            font-size: 9px;
+        }
+
+        .avaliacao p {
+            font-size: 8px;
+            color: #505b6d;
+            line-height: 1.6;
+        }
+
+        /* =========================
+           CTA
+        ========================= */
+
+        .cta {
+            margin: 20px 45px;
+            min-height: 115px;
+            border-radius: 10px;
+            background:
+                linear-gradient(
+                    90deg,
+                    #0755b8,
+                    rgba(0,100,210,.55)
+                ),
+                url("imagens/cta.jpg");
+            background-size: cover;
+            background-position: center;
+            padding: 25px 30px;
+            color: white;
+        }
+
+        .cta h2 {
+            font-size: 16px;
+            margin-bottom: 6px;
+        }
+
+        .cta p {
+            font-size: 8px;
+            line-height: 1.5;
+            max-width: 230px;
+            margin-bottom: 10px;
+        }
+
+        .cta a {
+            display: inline-block;
+            background: white;
+            color: #0874ed;
+            padding: 8px 14px;
+            border-radius: 5px;
+            font-size: 8px;
+            font-weight: bold;
+        }
+
+        /* =========================
+           RODAPÉ
+        ========================= */
+
+        footer {
+            background: #031b45;
+            color: white;
+            padding: 28px 45px 12px;
+        }
+
+        .footer-grid {
+            display: grid;
+            grid-template-columns: 1.5fr 1fr 1fr 1.3fr 1.3fr;
+            gap: 25px;
+        }
+
+        footer .logo-text strong {
+            color: white;
+        }
+
+        footer .logo-text small {
+            color: #b8c8df;
+        }
+
+        .footer-col h3 {
+            font-size: 10px;
+            margin-bottom: 11px;
+        }
+
+        .footer-col p,
+        .footer-col a {
+            display: block;
+            color: #bdcce0;
+            font-size: 8px;
+            line-height: 1.9;
+        }
+
+        .newsletter input {
+            width: 100%;
+            padding: 8px;
+            border: none;
+            border-radius: 5px;
+            margin: 8px 0;
+            font-size: 8px;
+        }
+
+        .newsletter button {
+            width: 100%;
+            padding: 8px;
+            border: none;
+            border-radius: 5px;
+            background: #0874ed;
+            color: white;
+            font-size: 8px;
+            cursor: pointer;
+        }
+
+        .copyright {
+            text-align: center;
+            border-top: 1px solid rgba(255,255,255,.15);
+            padding-top: 10px;
+            margin-top: 18px;
+            font-size: 8px;
+            color: #9aabc3;
+        }
+
+        /* =========================
+           MENSAGEM
+        ========================= */
+
+        #mensagem {
+            display: none;
+            margin: 20px 45px;
+            padding: 12px;
+            border-radius: 8px;
+            background: #e8f3ff;
+            color: #0754b8;
+            font-size: 12px;
+            text-align: center;
+        }
+
+        /* =========================
+           RESPONSIVO
+        ========================= */
+
+        @media (max-width: 900px) {
+
+            header {
+                padding: 15px 20px;
+            }
+
+            nav {
+                display: none;
+            }
+
+            .hero-content {
+                width: 70%;
+            }
+
+            .destinos,
+            .pacotes {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .beneficios {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .search-box {
+                width: calc(100% - 60px);
+            }
+
+            .footer-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 600px) {
+
+            header {
+                padding: 15px;
+            }
+
+            .header-buttons {
+                display: none;
+            }
+
+            .hero {
+                min-height: 470px;
+            }
+
+            .hero-content {
+                width: 100%;
+                padding: 100px 25px 30px;
+            }
+
+            .hero h1 {
+                font-size: 30px;
+            }
+
+            .search-box {
+                width: calc(100% - 30px);
+                flex-direction: column;
+                align-items: stretch;
+                padding: 10px;
+            }
+
+            .search-item {
+                border-right: none;
+                border-bottom: 1px solid #e3eaf2;
+                padding: 10px;
+            }
+
+            .search-button {
+                width: 100%;
+                margin-top: 8px;
+            }
+
+            .section,
+            .pacotes-area {
+                padding-left: 20px;
+                padding-right: 20px;
+            }
+
+            .destinos,
+            .pacotes,
+            .beneficios,
+            .avaliacoes,
+            .footer-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .cta {
+                margin-left: 20px;
+                margin-right: 20px;
+            }
+
+            footer {
+                padding-left: 20px;
+                padding-right: 20px;
+            }
+
+            #mensagem {
+                margin-left: 20px;
+                margin-right: 20px;
+            }
+        }
+
+    </style>
+</head>
+
+<body>
+
+    <!-- =========================
+         CABEÇALHO
+    ========================== -->
+
+    <header>
+
+        <a href="#inicio" class="logo">
+
+            <div class="logo-icon">✈</div>
+
+            <div class="logo-text">
+                <strong>TrilhaGlobal</strong>
+                <small>O mundo ao seu alcance</small>
+            </div>
+
+        </a>
+
+        <nav>
+            <a href="#inicio">Início</a>
+            <a href="#destinos">Destinos</a>
+            <a href="#pacotes">Pacotes</a>
+            <a href="#sobre">Sobre Nós</a>
+            <a href="#contato">Contato</a>
+        </nav>
+
+        <div class="header-buttons">
+
+            <a href="login.html" class="login-btn">
+                Entrar
+            </a>
+
+            <a href="cadastro.html" class="register-btn">
+                Cadastrar
+            </a>
+
+        </div>
+
+    </header>
+
+
+    <!-- =========================
+         BANNER
+    ========================== -->
+
+    <section class="hero" id="inicio">
+
+        <div class="hero-content">
+
+            <h1>
+                Viaje mais.<br>
+                Descubra o mundo<br>
+                com o <span>TrilhaGlobal</span>
+            </h1>
+
+            <p>
+                Encontre os melhores destinos, pacotes incríveis
+                e viva experiências inesquecíveis.
+            </p>
+
+            <div class="hero-buttons">
+
+                <a href="#pacotes" class="btn btn-blue">
+                    Ver Pacotes
+                </a>
+
+                <a href="#destinos" class="btn btn-white">
+                    📍 &nbsp; Explorar Destinos
+                </a>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- =========================
+         PESQUISA
+    ========================== -->
+
+    <div class="search-box">
+
+        <div class="search-item">
+
+            <strong>
+                📍 Destino
+            </strong>
+
+            <input
+                type="text"
+                id="destinoBusca"
+                placeholder="Para onde você quer ir?"
+            >
+
+        </div>
+
+        <div class="search-item">
+
+            <strong>
+                📅 Data
+            </strong>
+
+            <input
+                type="date"
+                id="dataBusca"
+            >
+
+        </div>
+
+        <div class="search-item">
+
+            <strong>
+                👥 Pessoas
+            </strong>
+
+            <input
+                type="number"
+                id="pessoasBusca"
+                min="1"
+                placeholder="Quantidade"
+            >
+
+        </div>
+
+        <button
+            class="search-button"
+            onclick="buscarViagem()"
+        >
+            🔍 Buscar
+        </button>
+
+    </div>
+
+
+    <div id="mensagem"></div>
+
+
+    <main>
+
+        <!-- =========================
+             DESTINOS
+        ========================== -->
+
+        <section class="section" id="destinos">
+
+            <div class="section-header">
+
+                <h2>Destinos em destaque</h2>
+
+                <a href="#destinos">
+                    Ver todos os destinos ›
+                </a>
+
+            </div>
+
+            <div class="destinos">
+
+                <article
+                    class="destino-card"
+                    style="background-image:url('imagens/rio.jpg');"
+                >
+
+                    <div class="destino-info">
+
+                        <span class="rating">★ 4,8</span>
+
+                        <h3>Rio de Janeiro</h3>
+
+                        <p>Brasil</p>
+
+                    </div>
+
+                </article>
+
+
+                <article
+                    class="destino-card"
+                    style="background-image:url('imagens/cancun.jpg');"
+                >
+
+                    <div class="destino-info">
+
+                        <span class="rating">★ 4,7</span>
+
+                        <h3>Cancún</h3>
+
+                        <p>México</p>
+
+                    </div>
+
+                </article>
+
+
+                <article
+                    class="destino-card"
+                    style="background-image:url('imagens/paris.jpg');"
+                >
+
+                    <div class="destino-info">
+
+                        <span class="rating">★ 4,9</span>
+
+                        <h3>Paris</h3>
+
+                        <p>França</p>
+
+                    </div>
+
+                </article>
+
+
+                <article
+                    class="destino-card"
+                    style="background-image:url('imagens/bali.jpg');"
+                >
+
+                    <div class="destino-info">
+
+                        <span class="rating">★ 4,8</span>
+
+                        <h3>Bali</h3>
+
+                        <p>Indonésia</p>
+
+                    </div>
+
+                </article>
+
+            </div>
+
+        </section>
+
+
+        <!-- =========================
+             SOBRE / BENEFÍCIOS
+        ========================== -->
+
+        <section class="section" id="sobre">
+
+            <div class="section-header">
+
+                <h2>Por que escolher o TrilhaGlobal?</h2>
+
+            </div>
+
+            <div class="beneficios">
+
+                <div class="beneficio">
+
+                    <div class="beneficio-icon">🛡</div>
+
+                    <div>
+                        <h3>Segurança</h3>
+
+                        <p>
+                            Sua segurança é nossa prioridade
+                            em todas as viagens.
+                        </p>
+                    </div>
+
+                </div>
+
+
+                <div class="beneficio">
+
+                    <div class="beneficio-icon">🏷</div>
+
+                    <div>
+                        <h3>Melhores Preços</h3>
+
+                        <p>
+                            Pacotes exclusivos com os
+                            melhores preços.
+                        </p>
+                    </div>
+
+                </div>
+
+
+                <div class="beneficio">
+
+                    <div class="beneficio-icon">🎧</div>
+
+                    <div>
+                        <h3>Suporte 24h</h3>
+
+                        <p>
+                            Atendimento dedicado antes,
+                            durante e após sua viagem.
+                        </p>
+                    </div>
+
+                </div>
+
+
+                <div class="beneficio">
+
+                    <div class="beneficio-icon">🧳</div>
+
+                    <div>
+                        <h3>Experiências Únicas</h3>
+
+                        <p>
+                            Roteiros selecionados para
+                            proporcionar momentos inesquecíveis.
+                        </p>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- =========================
+             PACOTES
+        ========================== -->
+
+        <section class="pacotes-area" id="pacotes">
+
+            <div class="section-header">
+
+                <h2>Nossos Pacotes</h2>
+
+                <a href="#pacotes">
+                    Ver todos os pacotes ›
+                </a>
+
+            </div>
+
+            <div class="pacotes">
+
+                <article class="pacote">
+
+                    <img src="imagens/maldivas.jpg">
+
+                    <div class="pacote-content">
+
+                        <h3>Maldivas Paradise</h3>
+
+                        <p>7 dias / 6 noites</p>
+
+                        <div class="pacote-bottom">
+
+                            <div class="preco">
+
+                                <small>A partir de</small>
+
+                                <strong>R$ 6.499</strong>
+
+                            </div>
+
+                            <a href="#" class="detalhes">
+                                Ver Detalhes
+                            </a>
+
+                        </div>
+
+                    </div>
+
+                </article>
+
+
+                <article class="pacote">
+
+                    <img src="imagens/grecia.jpg">
+
+                    <div class="pacote-content">
+
+                        <h3>Grécia Clássica</h3>
+
+                        <p>10 dias / 9 noites</p>
+
+                        <div class="pacote-bottom">
+
+                            <div class="preco">
+
+                                <small>A partir de</small>
+
+                                <strong>R$ 7.999</strong>
+
+                            </div>
+
+                            <a href="#" class="detalhes">
+                                Ver Detalhes
+                            </a>
+
+                        </div>
+
+                    </div>
+
+                </article>
+
+
+                <article class="pacote">
+
+                    <img src="imagens/newyork.jpg">
+
+                    <div class="pacote-content">
+
+                        <h3>Nova York Experience</h3>
+
+                        <p>6 dias / 5 noites</p>
+
+                        <div class="pacote-bottom">
+
+                            <div class="preco">
+
+                                <small>A partir de</small>
+
+                                <strong>R$ 5.299</strong>
+
+                            </div>
+
+                            <a href="#" class="detalhes">
+                                Ver Detalhes
+                            </a>
+
+                        </div>
+
+                    </div>
+
+                </article>
+
+
+                <article class="pacote">
+
+                    <img src="imagens/dubai.jpg">
+
+                    <div class="pacote-content">
+
+                        <h3>Dubai com Estilo</h3>
+
+                        <p>5 dias / 4 noites</p>
+
+                        <div class="pacote-bottom">
+
+                            <div class="preco">
+
+                                <small>A partir de</small>
+
+                                <strong>R$ 4.299</strong>
+
+                            </div>
+
+                            <a href="#" class="detalhes">
+                                Ver Detalhes
+                            </a>
+
+                        </div>
+
+                    </div>
+
+                </article>
+
+            </div>
+
+        </section>
+
+
+        <!-- =========================
+             AVALIAÇÕES
+        ========================== -->
+
+        <section class="section">
+
+            <div class="section-header">
+
+                <h2>O que nossos clientes dizem</h2>
+
+            </div>
+
+            <div class="avaliacoes">
+
+                <article class="avaliacao">
+
+                    <div class="cliente">
+
+                        <img
+                            class="cliente-foto"
+                            src="imagens/cliente1.jpg"
+                        >
+
+                        <div>
+
+                            <strong>Juliana Martins</strong>
+
+                            <span>São Paulo - SP</span>
+
+                            <div class="estrelas">
+                                ★★★★★
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                    <p>
+                        A viagem foi simplesmente incrível!
+                        A TrilhaGlobal cuidou de cada detalhe.
+                    </p>
+
+                </article>
+
+
+                <article class="avaliacao">
+
+                    <div class="cliente">
+
+                        <img
+                            class="cliente-foto"
+                            src="imagens/cliente2.jpg"
+                        >
+
+                        <div>
+
+                            <strong>Carlos Eduardo</strong>
+
+                            <span>Curitiba - PR</span>
+
+                            <div class="estrelas">
+                                ★★★★★
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                    <p>
+                        Atendimento excelente desde o primeiro
+                        contato até o retorno. Super recomendo!
+                    </p>
+
+                </article>
+
+
+                <article class="avaliacao">
+
+                    <div class="cliente">
+
+                        <img
+                            class="cliente-foto"
+                            src="imagens/cliente3.jpg"
+                        >
+
+                        <div>
+
+                            <strong>Fernanda Lima</strong>
+
+                            <span>Belo Horizonte - MG</span>
+
+                            <div class="estrelas">
+                                ★★★★★
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                    <p>
+                        Os destinos são maravilhosos e os pacotes
+                        têm preços justos. Experiência perfeita!
+                    </p>
+
+                </article>
+
+            </div>
+
+        </section>
+
+
+        <!-- =========================
+             CTA
+        ========================== -->
+
+        <section class="cta">
+
+            <h2>
+                Pronto para sua próxima aventura?
+            </h2>
+
+            <p>
+                Escolha seu destino e deixe o TrilhaGlobal
+                cuidar de tudo para você!
+            </p>
+
+            <a href="#pacotes">
+                Explorar Pacotes ›
+            </a>
+
+        </section>
+
+    </main>
+
+
+    <!-- =========================
+         RODAPÉ
+    ========================== -->
+
+    <footer id="contato">
+
+        <div class="footer-grid">
+
+            <div class="footer-col">
+
+                <div class="logo">
+
+                    <div class="logo-icon">✈</div>
+
+                    <div class="logo-text">
+
+                        <strong>TrilhaGlobal</strong>
+
+                        <small>
+                            O mundo ao seu alcance
+                        </small>
+
+                    </div>
+
+                </div>
+
+                <p>
+                    Conectamos você aos melhores destinos
+                    com experiências únicas e inesquecíveis.
+                </p>
+
+            </div>
+
+
+            <div class="footer-col">
+
+                <h3>Links Rápidos</h3>
+
+                <a href="#inicio">Início</a>
+                <a href="#destinos">Destinos</a>
+                <a href="#pacotes">Pacotes</a>
+                <a href="#sobre">Sobre Nós</a>
+                <a href="#contato">Contato</a>
+
+            </div>
+
+
+            <div class="footer-col">
+
+                <h3>Suporte</h3>
+
+                <a href="#">Central de Ajuda</a>
+                <a href="#">Perguntas Frequentes</a>
+                <a href="#">Políticas de Privacidade</a>
+                <a href="#">Termos de Uso</a>
+
+            </div>
+
+
+            <div class="footer-col">
+
+                <h3>Contato</h3>
+
+                <p>☎ (11) 99999-9999</p>
+
+                <p>
+                    ✉ contato@trilhaglobal.com.br
+                </p>
+
+                <p>
+                    📍 Rua das Viagens, 123
+                    <br>
+                    São Paulo - SP
+                </p>
+
+            </div>
+
+
+            <div class="footer-col newsletter">
+
+                <h3>Newsletter</h3>
+
+                <p>
+                    Receba ofertas exclusivas e
+                    novidades por e-mail.
+                </p>
+
+                <input
+                    type="email"
+                    id="emailNewsletter"
+                    placeholder="Seu melhor e-mail"
+                >
+
+                <button onclick="inscreverNewsletter()">
+                    Inscrever-se
+                </button>
+
+            </div>
+
+        </div>
+
+
+        <div class="copyright">
+
+            © 2026 TrilhaGlobal. Todos os direitos reservados.
+
+        </div>
+
+    </footer>
+
+
+    <!-- =========================
+         JAVASCRIPT
+    ========================== -->
+
+    <script>
+
+        /*
+         * ============================
+         * FIREBASE
+         * ============================
+         *
+         * IMPORTANTE:
+         * Coloque aqui as informações
+         * do seu Firebase.
+         *
+         * Se você já possui firebase-config.js,
+         * podemos integrar esse arquivo depois.
+         */
+
+        const firebaseConfig = {
+
+            apiKey: "COLOQUE_SUA_API_KEY",
+
+            authDomain: "SEU_PROJETO.firebaseapp.com",
+
+            projectId: "SEU_PROJECT_ID",
+
+            storageBucket: "SEU_PROJETO.appspot.com",
+
+            messagingSenderId: "SEU_SENDER_ID",
+
+            appId: "SEU_APP_ID"
+
+        };
+
+
+        /*
+         * Só inicializa o Firebase quando
+         * as configurações forem preenchidas.
+         */
+
+        function iniciarFirebase() {
+
+            if (
+                firebaseConfig.apiKey === "COLOQUE_SUA_API_KEY" ||
+                firebaseConfig.projectId === "SEU_PROJECT_ID"
+            ) {
+
+                console.log(
+                    "Firebase ainda não configurado."
+                );
+
+                return;
+
+            }
+
+            if (!firebase.apps.length) {
+
+                firebase.initializeApp(
+                    firebaseConfig
+                );
+
+            }
+
+            console.log(
+                "Firebase conectado!"
+            );
+
+        }
+
+
+        /*
+         * ============================
+         * BUSCA
+         * ============================
+         */
+
+        function buscarViagem() {
+
+            const destino =
+                document.getElementById(
+                    "destinoBusca"
+                ).value;
+
+            const data =
+                document.getElementById(
+                    "dataBusca"
+                ).value;
+
+            const pessoas =
+                document.getElementById(
+                    "pessoasBusca"
+                ).value;
+
+            const mensagem =
+                document.getElementById(
+                    "mensagem"
+                );
+
+
+            if (!destino) {
+
+                mensagem.style.display = "block";
+
+                mensagem.innerText =
+                    "Digite um destino para realizar a busca.";
+
+                return;
+
+            }
+
+
+            mensagem.style.display = "block";
+
+            mensagem.innerText =
+                "🔎 Buscando viagens para " +
+                destino +
+                (data
+                    ? " na data selecionada"
+                    : "") +
+                (pessoas
+                    ? " para " + pessoas + " pessoa(s)."
+                    : ".");
+
+
+            document
+                .getElementById("destinos")
+                .scrollIntoView({
+                    behavior: "smooth"
+                });
+
+        }
+
+
+        /*
+         * ============================
+         * NEWSLETTER
+         * ============================
+         */
+
+        function inscreverNewsletter() {
+
+            const email =
+                document.getElementById(
+                    "emailNewsletter"
+                ).value;
+
+
+            if (!email) {
+
+                alert(
+                    "Digite seu e-mail."
+                );
+
+                return;
+
+            }
+
+
+            alert(
+                "E-mail cadastrado com sucesso! 💙"
+            );
+
+
+            document.getElementById(
+                "emailNewsletter"
+            ).value = "";
+
+        }
+
+
+        /*
+         * ============================
+         * INICIALIZAÇÃO
+         * ============================
+         */
+
+        document.addEventListener(
+            "DOMContentLoaded",
+            function () {
+
+                iniciarFirebase();
+
+                console.log(
+                    "TrilhaGlobal carregado com sucesso!"
+                );
+
+            }
+        );
+
+    </script>
+
+</body>
+
+</html>
