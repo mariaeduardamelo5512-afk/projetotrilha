@@ -1,9 +1,8 @@
-// Import the functions you need from the SDKs you need
-import { initializeApp } from "firebase/app";
-// TODO: Add SDKs for Firebase products that you want to use
-// https://firebase.google.com/docs/web/setup#available-libraries
+// Importa o Firebase pela internet
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js";
+import { getFirestore } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
 
-// Your web app's Firebase configuration
+// Configuração do Firebase
 const firebaseConfig = {
   apiKey: "AIzaSyDlPWkjOJ3dzRFhgISHyASVqMCoYdTniho",
   authDomain: "projetotrilha-861da.firebaseapp.com",
@@ -13,5 +12,11 @@ const firebaseConfig = {
   appId: "1:187839105843:web:51007f1777b38131448c46"
 };
 
-// Initialize Firebase
+// Inicializa o Firebase
 const app = initializeApp(firebaseConfig);
+
+// Inicializa o banco de dados Firestore
+const db = getFirestore(app);
+
+// Exporta para outros arquivos
+export { db };
