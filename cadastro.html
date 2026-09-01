@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TrilhaGlobal | Cadastro</title>
+
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+    <script src="js/Config.js"></script>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, Helvetica, sans-serif;
+        }
+
+        body {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background:
+                linear-gradient(rgba(3, 27, 69, .72), rgba(8, 116, 237, .55)),
+                url("imagens/banner.jpg") center/cover;
+            padding: 20px;
+        }
+
+        .cadastro-container {
+            width: 100%;
+            max-width: 430px;
+            background: rgba(255, 255, 255, .96);
+            border-radius: 18px;
+            padding: 32px;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, .22);
+        }
+
+        .logo {
+            text-align: center;
+            margin-bottom: 22px;
+        }
+
+        .logo-icon {
+            width: 48px;
+            height: 48px;
+            margin: 0 auto 8px;
+            border-radius: 50%;
+            background: #0874ed;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 25px;
+        }
+
+        .logo h1 {
+            color: #0754b8;
+            font-size: 26px;
+        }
+
+        .logo p {
+            color: #667085;
+            font-size: 12px;
+            margin-top: 4px;
+        }
+
+        h2 {
+            color: #101a32;
+            font-size: 22px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .campo {
+            margin-bottom: 14px;
+        }
+
+        label {
+            display: block;
+            color: #17233c;
+            font-size: 12px;
+            font-weight: bold;
+            margin-bottom: 6px;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px 13px;
+            border: 1px solid #d8e2ef;
+            border-radius: 8px;
+            outline: none;
+            font-size: 13px;
+        }
+
+        input:focus {
+            border-color: #0874ed;
+            box-shadow: 0 0 0 3px rgba(8,116,237,.10);
+        }
+
+        button {
+            width: 100%;
+            border: none;
+            border-radius: 8px;
+            padding: 13px;
+            background: #0874ed;
+            color: white;
+            font-size: 13px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 8px;
+        }
+
+        button:hover {
+            background: #075fc4;
+        }
+
+        button:disabled {
+            opacity: .65;
+            cursor: not-allowed;
+        }
+
+        #mensagem {
+            display: none;
+            margin: 12px 0;
+            padding: 10px;
+            border-radius: 8px;
+            font-size: 12px;
+            text-align: center;
+        }
+
+        #mensagem.erro {
+            display: block;
+            background: #ffecec;
+            color: #b42318;
+        }
+
+        #mensagem.sucesso {
+            display: block;
+            background: #e9f9ef;
+            color: #087443;
+        }
+
+        .login {
+            text-align: center;
+            margin-top: 18px;
+            font-size: 12px;
+            color: #667085;
+        }
+
+        .login a {
+            color: #0874ed;
+            font-weight: bold;
+            text-decoration: none;
+        }
+
+        .voltar {
+            display: block;
+            text-align: center;
+            margin-top: 12px;
+            color: #667085;
+            font-size: 11px;
+            text-decoration: none;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="cadastro-container">
+
+        <div class="logo">
+            <div class="logo-icon">✈</div>
+            <h1>TrilhaGlobal</h1>
+            <p>O mundo ao seu alcance</p>
+        </div>
+
+        <h2>Criar sua conta</h2>
+
+        <form id="formCadastro">
+
+            <div class="campo">
+                <label for="nome">Nome completo</label>
+                <input type="text" id="nome" placeholder="Digite seu nome" required>
+            </div>
+
+            <div class="campo">
+                <label for="email">E-mail</label>
+                <input type="email" id="email" placeholder="Digite seu e-mail" required>
+            </div>
+
+            <div class="campo">
+                <label for="senha">Senha</label>
+                <input type="password" id="senha" placeholder="Digite sua senha" minlength="6" required>
+            </div>
+
+            <div class="campo">
+                <label for="confirmarSenha">Confirmar senha</label>
+                <input type="password" id="confirmarSenha" placeholder="Digite a senha novamente" minlength="6" required>
+            </div>
+
+            <div id="mensagem"></div>
+
+            <button type="submit" id="btnCadastrar">Criar conta</button>
+
+        </form>
+
+        <div class="login">
+            Já possui uma conta?
+            <a href="login.html">Entrar</a>
+        </div>
+
+        <a href="index.html" class="voltar">← Voltar para o início</a>
+
+    </div>
+
+    <script>
+        // Inicializa o Firebase usando o Config.js
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
+
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+
+        const form = document.getElementById("formCadastro");
+        const mensagem = document.getElementById("mensagem");
+        const botao = document.getElementById("btnCadastrar");
+
+        function mostrarMensagem(texto, tipo) {
+            mensagem.textContent = texto;
+            mensagem.className = tipo;
+        }
+
+        form.addEventListener("submit", async function(event) {
+            event.preventDefault();
+
+            const nome = document.getElementById("nome").value.trim();
+            const email = document.getElementById("email").value.trim();
+            const senha = document.getElementById("senha").value;
+            const confirmarSenha = document.getElementById("confirmarSenha").value;
+
+            if (!nome) {
+                mostrarMensagem("Digite seu nome completo.", "erro");
+                return;
+            }
+
+            if (senha.length < 6) {
+                mostrarMensagem("A senha precisa ter pelo menos 6 caracteres.", "erro");
+                return;
+            }
+
+            if (senha !== confirmarSenha) {
+                mostrarMensagem("As senhas não são iguais.", "erro");
+                return;
+            }
+
+            botao.disabled = true;
+            botao.textContent = "Cadastrando...";
+            mensagem.className = "";
+
+            try {
+                // Cria a conta no Firebase Authentication
+                const resultado = await auth.createUserWithEmailAndPassword(email, senha);
+
+                // Salva os dados básicos do usuário no Firestore
+                await db.collection("usuarios").doc(resultado.user.uid).set({
+                    nome: nome,
+                    email: email,
+                    criadoEm: firebase.firestore.FieldValue.serverTimestamp()
+                });
+
+                // Atualiza o nome do usuário no Authentication
+                await resultado.user.updateProfile({
+                    displayName: nome
+                });
+
+                mostrarMensagem("Cadastro realizado com sucesso! Redirecionando...", "sucesso");
+
+                setTimeout(() => {
+                    window.location.href = "index.html";
+                }, 1500);
+
+            } catch (erro) {
+                console.error(erro);
+
+                let texto = "Não foi possível realizar o cadastro.";
+
+                if (erro.code === "auth/email-already-in-use") {
+                    texto = "Este e-mail já está cadastrado.";
+                } else if (erro.code === "auth/invalid-email") {
+                    texto = "Digite um e-mail válido.";
+                } else if (erro.code === "auth/weak-password") {
+                    texto = "A senha é muito fraca. Use pelo menos 6 caracteres.";
+                }
+
+                mostrarMensagem(texto, "erro");
+
+                botao.disabled = false;
+                botao.textContent = "Criar conta";
+            }
+        });
+    </script>
+
+</body>
+</html>

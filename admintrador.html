@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TrilhaGlobal | Painel Administrativo</title>
+
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script src="js/Config.js"></script>
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:Arial,Helvetica,sans-serif}
+body{background:#eef5fb;color:#14213d}
+header{height:70px;background:#031b45;color:#fff;display:flex;align-items:center;justify-content:space-between;padding:0 35px;box-shadow:0 2px 10px rgba(0,0,0,.12)}
+.logo{display:flex;align-items:center;gap:10px;font-size:20px;font-weight:bold}.logo span{font-size:25px}
+.usuario{display:flex;align-items:center;gap:14px;font-size:13px}.usuario button,.sair{border:none;background:#0874ed;color:#fff;padding:9px 15px;border-radius:7px;cursor:pointer;font-weight:bold}
+.layout{display:flex;min-height:calc(100vh - 70px)}
+aside{width:230px;background:#fff;border-right:1px solid #dfe8f3;padding:22px 12px}
+.menu-btn{width:100%;border:none;background:transparent;text-align:left;padding:13px 15px;border-radius:8px;margin-bottom:6px;color:#42526b;font-weight:bold;cursor:pointer;font-size:13px}
+.menu-btn:hover,.menu-btn.ativo{background:#eaf4ff;color:#0874ed}
+main{flex:1;padding:30px;max-width:1400px}
+.titulo{margin-bottom:25px}.titulo h1{font-size:25px;color:#101a32}.titulo p{margin-top:6px;color:#697487;font-size:13px}
+.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:25px}
+.card{background:#fff;border-radius:12px;padding:20px;box-shadow:0 4px 16px rgba(22,55,90,.08);border:1px solid #e8eef5}
+.card small{color:#687589}.card strong{display:block;font-size:28px;margin-top:8px;color:#0874ed}
+.painel{display:none}.painel.ativo{display:block}
+.caixa{background:#fff;border-radius:12px;padding:22px;box-shadow:0 4px 16px rgba(22,55,90,.08);border:1px solid #e8eef5}
+.caixa h2{font-size:18px;margin-bottom:18px}
+.form-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:15px}.campo{display:flex;flex-direction:column;gap:6px}.campo.full{grid-column:1/-1}
+label{font-size:12px;font-weight:bold;color:#34415a}
+input,textarea,select{padding:11px;border:1px solid #dce5ef;border-radius:7px;outline:none;font-size:13px}
+textarea{resize:vertical;min-height:90px}input:focus,textarea:focus,select:focus{border-color:#0874ed}
+.btn{border:none;background:#0874ed;color:#fff;padding:11px 18px;border-radius:7px;font-weight:bold;cursor:pointer;margin-top:18px}
+.btn.excluir{background:#dc3545;margin:0;padding:7px 10px;font-size:11px}.btn.editar{background:#f0a500;margin:0 5px 0 0;padding:7px 10px;font-size:11px}
+.tabela-wrap{overflow-x:auto}table{width:100%;border-collapse:collapse;font-size:12px}th,td{text-align:left;padding:12px;border-bottom:1px solid #e7edf4}th{color:#667085;background:#f8fbff}
+#mensagem{display:none;margin-bottom:16px;padding:12px;border-radius:8px;font-size:13px}.sucesso{display:block!important;background:#e9f9ef;color:#087443}.erro{display:block!important;background:#ffecec;color:#b42318}
+.vazio{text-align:center;color:#7a8699;padding:25px}
+@media(max-width:900px){aside{width:180px}.cards{grid-template-columns:1fr}.form-grid{grid-template-columns:1fr}}
+@media(max-width:650px){header{padding:0 15px}.layout{display:block}aside{width:100%;display:flex;overflow:auto;padding:8px}.menu-btn{white-space:nowrap;width:auto;margin:0 4px}main{padding:18px}.form-grid{grid-template-columns:1fr}.campo.full{grid-column:auto}.usuario span{display:none}}
+</style>
+</head>
+<body>
+
+<header>
+    <div class="logo"><span>✈</span> TrilhaGlobal Admin</div>
+    <div class="usuario">
+        <span id="nomeAdmin">Carregando...</span>
+        <button class="sair" onclick="sair()">Sair</button>
+    </div>
+</header>
+
+<div class="layout">
+<aside>
+    <button class="menu-btn ativo" onclick="abrirPainel('inicio',this)">📊 Visão geral</button>
+    <button class="menu-btn" onclick="abrirPainel('pacotes',this)">📦 Pacotes</button>
+    <button class="menu-btn" onclick="abrirPainel('destinos',this)">📍 Destinos</button>
+    <button class="menu-btn" onclick="abrirPainel('usuarios',this)">👥 Usuários</button>
+    <button class="menu-btn" onclick="abrirPainel('agendamentos',this)">📅 Agendamentos</button>
+</aside>
+
+<main>
+<div id="mensagem"></div>
+
+<section id="inicio" class="painel ativo">
+    <div class="titulo"><h1>Visão geral</h1><p>Acompanhe as informações do TrilhaGlobal.</p></div>
+    <div class="cards">
+        <div class="card"><small>Usuários cadastrados</small><strong id="totalUsuarios">0</strong></div>
+        <div class="card"><small>Pacotes cadastrados</small><strong id="totalPacotes">0</strong></div>
+        <div class="card"><small>Destinos cadastrados</small><strong id="totalDestinos">0</strong></div>
+    </div>
+</section>
+
+<section id="pacotes" class="painel">
+    <div class="titulo"><h1>Gerenciar pacotes</h1><p>Cadastre, edite ou exclua pacotes de viagem.</p></div>
+    <div class="caixa">
+        <h2 id="tituloPacote">Cadastrar pacote</h2>
+        <form id="formPacote">
+            <input type="hidden" id="pacoteId">
+            <div class="form-grid">
+                <div class="campo"><label>Nome do pacote</label><input id="pacoteNome" required></div>
+                <div class="campo"><label>Preço</label><input id="pacotePreco" type="number" step="0.01" required></div>
+                <div class="campo"><label>Duração</label><input id="pacoteDuracao" placeholder="Ex.: 7 dias / 6 noites" required></div>
+                <div class="campo"><label>Imagem (URL ou caminho)</label><input id="pacoteImagem" placeholder="imagens/maldivas.jpg"></div>
+                <div class="campo full"><label>Descrição</label><textarea id="pacoteDescricao"></textarea></div>
+            </div>
+            <button class="btn" type="submit">Salvar pacote</button>
+            <button class="btn" type="button" onclick="limparPacote()" style="background:#697487">Cancelar edição</button>
+        </form>
+    </div>
+    <br>
+    <div class="caixa"><h2>Pacotes cadastrados</h2><div id="listaPacotes"></div></div>
+</section>
+
+<section id="destinos" class="painel">
+    <div class="titulo"><h1>Gerenciar destinos</h1><p>Cadastre e atualize os destinos disponíveis.</p></div>
+    <div class="caixa">
+        <h2 id="tituloDestino">Cadastrar destino</h2>
+        <form id="formDestino">
+            <input type="hidden" id="destinoId">
+            <div class="form-grid">
+                <div class="campo"><label>Nome do destino</label><input id="destinoNome" required></div>
+                <div class="campo"><label>País</label><input id="destinoPais" required></div>
+                <div class="campo"><label>Avaliação</label><input id="destinoAvaliacao" type="number" step="0.1" min="0" max="5"></div>
+                <div class="campo"><label>Imagem (URL ou caminho)</label><input id="destinoImagem" placeholder="imagens/rio.jpg"></div>
+                <div class="campo full"><label>Descrição</label><textarea id="destinoDescricao"></textarea></div>
+            </div>
+            <button class="btn" type="submit">Salvar destino</button>
+            <button class="btn" type="button" onclick="limparDestino()" style="background:#697487">Cancelar edição</button>
+        </form>
+    </div>
+    <br>
+    <div class="caixa"><h2>Destinos cadastrados</h2><div id="listaDestinos"></div></div>
+</section>
+
+<section id="usuarios" class="painel">
+    <div class="titulo"><h1>Usuários</h1><p>Contas cadastradas na plataforma.</p></div>
+    <div class="caixa">
+        <h2>Usuários cadastrados</h2>
+        <div style="display:flex;gap:10px;margin-bottom:15px">
+            <input type="text" id="pesquisaUsuario" placeholder="Pesquisar por nome ou e-mail..."
+                   oninput="filtrarUsuarios()" style="flex:1">
+        </div>
+        <div id="listaUsuarios"></div>
+    </div>
+</section>
+
+<section id="agendamentos" class="painel">
+    <div class="titulo"><h1>Agendamentos</h1><p>Solicitações e viagens cadastradas.</p></div>
+    <div class="caixa"><div id="listaAgendamentos"></div></div>
+</section>
+</main>
+</div>
+
+<script>
+if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.firestore();
+
+let usuarioAtual = null;
+
+auth.onAuthStateChanged(async user => {
+    if (!user) {
+        window.location.href = "login.html";
+        return;
+    }
+
+    usuarioAtual = user;
+    document.getElementById("nomeAdmin").textContent = user.displayName || user.email;
+
+    carregarTudo();
+});
+
+function abrirPainel(id, botao) {
+    document.querySelectorAll(".painel").forEach(p => p.classList.remove("ativo"));
+    document.querySelectorAll(".menu-btn").forEach(b => b.classList.remove("ativo"));
+    document.getElementById(id).classList.add("ativo");
+    botao.classList.add("ativo");
+}
+
+function mostrarMensagem(texto, tipo="sucesso") {
+    const msg = document.getElementById("mensagem");
+    msg.textContent = texto;
+    msg.className = tipo;
+    setTimeout(() => msg.className = "", 3500);
+}
+
+async function carregarTudo() {
+    await Promise.all([
+        carregarUsuarios(),
+        carregarPacotes(),
+        carregarDestinos(),
+        carregarAgendamentos()
+    ]);
+}
+
+async function carregarUsuarios() {
+    const snap = await db.collection("usuarios").get();
+    document.getElementById("totalUsuarios").textContent = snap.size;
+
+    let html = '<div class="tabela-wrap"><table id="tabelaUsuarios"><tr><th>Nome</th><th>E-mail</th><th>Cadastro</th><th>Ação</th></tr>';
+    if (snap.empty) html += '<tr><td colspan="4" class="vazio">Nenhum usuário cadastrado.</td></tr>';
+    snap.forEach(doc => {
+        const u = doc.data();
+        const data = u.criadoEm?.toDate ? u.criadoEm.toDate().toLocaleDateString("pt-BR") : "-";
+        const nome = String(u.nome || "-").replace(/'/g, "\\'");
+        const email = String(u.email || "-").replace(/'/g, "\\'");
+        html += `<tr class="linha-usuario" data-nome="${nome.toLowerCase()}" data-email="${email.toLowerCase()}">
+            <td>${u.nome || "-"}</td>
+            <td>${u.email || "-"}</td>
+            <td>${data}</td>
+            <td><button class="btn excluir" onclick="excluirUsuario('${doc.id}', '${nome}')">Excluir</button></td>
+        </tr>`;
+    });
+    html += '</table></div>';
+    document.getElementById("listaUsuarios").innerHTML = html;
+}
+
+
+function filtrarUsuarios() {
+    const busca = document.getElementById("pesquisaUsuario").value.toLowerCase().trim();
+    document.querySelectorAll(".linha-usuario").forEach(linha => {
+        const nome = linha.dataset.nome || "";
+        const email = linha.dataset.email || "";
+        linha.style.display = (nome.includes(busca) || email.includes(busca)) ? "" : "none";
+    });
+}
+
+async function excluirUsuario(id, nome) {
+    if (!confirm("Deseja excluir o cadastro de " + nome + " do Firestore?")) return;
+
+    try {
+        await db.collection("usuarios").doc(id).delete();
+        mostrarMensagem("Cadastro do usuário excluído com sucesso!");
+        carregarUsuarios();
+    } catch (erro) {
+        console.error(erro);
+        mostrarMensagem("Não foi possível excluir o usuário.", "erro");
+    }
+}
+
+document.getElementById("formPacote").addEventListener("submit", async e => {
+    e.preventDefault();
+    const id = document.getElementById("pacoteId").value;
+    const dados = {
+        nome: document.getElementById("pacoteNome").value.trim(),
+        preco: Number(document.getElementById("pacotePreco").value),
+        duracao: document.getElementById("pacoteDuracao").value.trim(),
+        imagem: document.getElementById("pacoteImagem").value.trim(),
+        descricao: document.getElementById("pacoteDescricao").value.trim(),
+        atualizadoEm: firebase.firestore.FieldValue.serverTimestamp()
+    };
+
+    if (id) await db.collection("pacotes").doc(id).update(dados);
+    else {
+        dados.criadoEm = firebase.firestore.FieldValue.serverTimestamp();
+        await db.collection("pacotes").add(dados);
+    }
+
+    mostrarMensagem(id ? "Pacote atualizado com sucesso!" : "Pacote cadastrado com sucesso!");
+    limparPacote();
+    carregarPacotes();
+});
+
+async function carregarPacotes() {
+    const snap = await db.collection("pacotes").get();
+    document.getElementById("totalPacotes").textContent = snap.size;
+    let html = '<div class="tabela-wrap"><table><tr><th>Pacote</th><th>Duração</th><th>Preço</th><th>Ações</th></tr>';
+    if (snap.empty) html += '<tr><td colspan="4" class="vazio">Nenhum pacote cadastrado.</td></tr>';
+    snap.forEach(doc => {
+        const p = doc.data();
+        html += `<tr><td>${p.nome || "-"}</td><td>${p.duracao || "-"}</td><td>R$ ${Number(p.preco || 0).toLocaleString("pt-BR",{minimumFractionDigits:2})}</td>
+        <td><button class="btn editar" onclick="editarPacote('${doc.id}')">Editar</button><button class="btn excluir" onclick="excluirPacote('${doc.id}')">Excluir</button></td></tr>`;
+    });
+    html += '</table></div>';
+    document.getElementById("listaPacotes").innerHTML = html;
+}
+
+async function editarPacote(id) {
+    const d = await db.collection("pacotes").doc(id).get();
+    const p = d.data();
+    document.getElementById("pacoteId").value = id;
+    document.getElementById("pacoteNome").value = p.nome || "";
+    document.getElementById("pacotePreco").value = p.preco || "";
+    document.getElementById("pacoteDuracao").value = p.duracao || "";
+    document.getElementById("pacoteImagem").value = p.imagem || "";
+    document.getElementById("pacoteDescricao").value = p.descricao || "";
+    document.getElementById("tituloPacote").textContent = "Editar pacote";
+    document.getElementById("pacotes").scrollIntoView({behavior:"smooth"});
+}
+
+async function excluirPacote(id) {
+    if (!confirm("Deseja excluir este pacote?")) return;
+    await db.collection("pacotes").doc(id).delete();
+    mostrarMensagem("Pacote excluído.");
+    carregarPacotes();
+}
+
+function limparPacote() {
+    document.getElementById("formPacote").reset();
+    document.getElementById("pacoteId").value = "";
+    document.getElementById("tituloPacote").textContent = "Cadastrar pacote";
+}
+
+document.getElementById("formDestino").addEventListener("submit", async e => {
+    e.preventDefault();
+    const id = document.getElementById("destinoId").value;
+    const dados = {
+        nome: document.getElementById("destinoNome").value.trim(),
+        pais: document.getElementById("destinoPais").value.trim(),
+        avaliacao: Number(document.getElementById("destinoAvaliacao").value || 0),
+        imagem: document.getElementById("destinoImagem").value.trim(),
+        descricao: document.getElementById("destinoDescricao").value.trim(),
+        atualizadoEm: firebase.firestore.FieldValue.serverTimestamp()
+    };
+
+    if (id) await db.collection("destinos").doc(id).update(dados);
+    else {
+        dados.criadoEm = firebase.firestore.FieldValue.serverTimestamp();
+        await db.collection("destinos").add(dados);
+    }
+
+    mostrarMensagem(id ? "Destino atualizado com sucesso!" : "Destino cadastrado com sucesso!");
+    limparDestino();
+    carregarDestinos();
+});
+
+async function carregarDestinos() {
+    const snap = await db.collection("destinos").get();
+    document.getElementById("totalDestinos").textContent = snap.size;
+    let html = '<div class="tabela-wrap"><table><tr><th>Destino</th><th>País</th><th>Avaliação</th><th>Ações</th></tr>';
+    if (snap.empty) html += '<tr><td colspan="4" class="vazio">Nenhum destino cadastrado.</td></tr>';
+    snap.forEach(doc => {
+        const d = doc.data();
+        html += `<tr><td>${d.nome || "-"}</td><td>${d.pais || "-"}</td><td>★ ${d.avaliacao || 0}</td>
+        <td><button class="btn editar" onclick="editarDestino('${doc.id}')">Editar</button><button class="btn excluir" onclick="excluirDestino('${doc.id}')">Excluir</button></td></tr>`;
+    });
+    html += '</table></div>';
+    document.getElementById("listaDestinos").innerHTML = html;
+}
+
+async function editarDestino(id) {
+    const d = await db.collection("destinos").doc(id).get();
+    const x = d.data();
+    document.getElementById("destinoId").value = id;
+    document.getElementById("destinoNome").value = x.nome || "";
+    document.getElementById("destinoPais").value = x.pais || "";
+    document.getElementById("destinoAvaliacao").value = x.avaliacao ?? "";
+    document.getElementById("destinoImagem").value = x.imagem || "";
+    document.getElementById("destinoDescricao").value = x.descricao || "";
+    document.getElementById("tituloDestino").textContent = "Editar destino";
+    document.getElementById("destinos").scrollIntoView({behavior:"smooth"});
+}
+
+async function excluirDestino(id) {
+    if (!confirm("Deseja excluir este destino?")) return;
+    await db.collection("destinos").doc(id).delete();
+    mostrarMensagem("Destino excluído.");
+    carregarDestinos();
+}
+
+function limparDestino() {
+    document.getElementById("formDestino").reset();
+    document.getElementById("destinoId").value = "";
+    document.getElementById("tituloDestino").textContent = "Cadastrar destino";
+}
+
+async function carregarAgendamentos() {
+    const snap = await db.collection("agendamentos").get();
+    let html = '<div class="tabela-wrap"><table><tr><th>Cliente</th><th>Destino/Pacote</th><th>Data</th><th>Pessoas</th></tr>';
+    if (snap.empty) html += '<tr><td colspan="4" class="vazio">Nenhum agendamento encontrado.</td></tr>';
+    snap.forEach(doc => {
+        const a = doc.data();
+        html += `<tr><td>${a.nome || a.cliente || "-"}</td><td>${a.destino || a.pacote || "-"}</td><td>${a.data || "-"}</td><td>${a.pessoas || "-"}</td></tr>`;
+    });
+    html += '</table></div>';
+    document.getElementById("listaAgendamentos").innerHTML = html;
+}
+
+function sair() {
+    auth.signOut().then(() => window.location.href = "login.html");
+}
+</script>
+</body>
+</html>
